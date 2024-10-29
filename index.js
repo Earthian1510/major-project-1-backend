@@ -40,6 +40,18 @@ app.get('/api/products/:id', async(req, res) => {
     }
 })
 
+app.get('/api/products/category/:category', async (req, res) => {
+    const category = req.params.category
+    try{
+        const products = await Product.find({category: category})
+        res.status(200).json({products: products})
+    }
+    catch(error) {
+        res.status(500).json({message: "Internal Server Error"})
+    }
+})
+
+
 app.post('/api/products', async(req,res) => {
     const { name, price, description, category, imgUrl } = req.body;
     try{
