@@ -5,6 +5,7 @@ const app = express()
 const {initializeDatabase} = require('./db/db.connection')
 const {Category} = require('./models/category.model')
 const {Product} = require('./models/products.model')
+const {Address} = require('./models/address.model')
 
 app.use(cors())
 app.use(express.json())
@@ -19,6 +20,26 @@ app.get('/api', (req, res) => {
 app.get('/api/products', async(req, res) => {
     try{
         const products = await Product.find()
+        res.json(products)
+    }
+    catch(error) {
+        res.status(500).json({message: "Internal Server Error"})
+    }
+})
+
+app.get('/api/products/cart', async(req, res) => {
+    try{
+        const products = await Product.find({inCart: true})
+        res.json(products)
+    }
+    catch(error) {
+        res.status(500).json({message: "Internal Server Error"})
+    }
+})
+
+app.get('/api/products/wishlist', async(req, res) => {
+    try{
+        const products = await Product.find({inWishlist: true})
         res.json(products)
     }
     catch(error) {
@@ -160,6 +181,75 @@ app.delete('/api/categories/:id', async(req, res) => {
         res.status(500).json({message: "Internal Server Error"})
     }
 })
+
+// Address API
+
+app.get('/api/user/address', async(req, res) => {
+    try{
+        const address = await Address.find()
+        res.json(address)
+    }
+    catch(error) {
+        res.status(500).json({message: "Internal Server Error"})
+    }
+})
+
+app.get('/api/user/address/:id', async(req, res) => {
+    const addressID = req.params.id
+    try{
+        const address = await Address.findById(addressID)
+        if(!address){
+            res.status(404).json({message: "address not found!"} )
+        }
+        res.status(200).json({address: address})
+    }
+    catch(error) {
+        res.status(500).json({message: "Internal Server Error"})
+    }
+})
+
+app.post('/api/user/address', async(req,res) => {
+    const { name, address, phoneNo } = req.body;
+    try{
+        const newAddress = new Address({name, address ,phoneNo})
+        await newAddress.save()
+        res.status(201).json(newAddress)
+    }
+    catch(error){
+        res.status(500).json({message: "Internal Server Error"})
+    }
+})
+
+app.put('/api/user/address/:id', async(req, res) => {
+    const addressID = req.params.id 
+    const addressToUpdate = req.body 
+    try{
+        const updatedAddress = await Address.findByIdAndUpdate(addressID, addressToUpdate, {new: true})
+        if(!updatedAddress) {
+            res.status(404).json({message: "Category not found"})
+        }
+        res.status(200).json(updatedAddress)
+    } 
+    catch(error) {
+        res.status(500).json({message: "Internal Server Error"})
+    }
+})
+
+app.delete('/api/user/address/:id', async(req, res) => {
+    const addressID = req.params.id 
+    try{
+        const deletedAddress = await Address.findByIdAndDelete(addressID)
+        if(!deletedAddress) {
+            res.status(404).json({error: "address not found"})
+        }
+        res.status(200).json({message: "address deleted successfully", address: deletedAddress})
+    }
+    catch(error) {
+        console.error(error)
+        res.status(500).json({message: "Internal Server Error"})
+    }
+})
+
 
 
 const PORT = process.env.PORT || 3000
