@@ -13,10 +13,11 @@ const productSchema = new mongoose.Schema({
         type: String
     }, 
     category: { type: String, required: true },
-    inCart: { type: Boolean },
-    inWishlist: { type: Boolean },
+    inCart: { type: Boolean, default: false },
+    inWishlist: { type: Boolean, default: false },
     quantity: {
-        type: Number
+        type: Number,
+        default: 1
     },
     imgUrl: {
         type: String
