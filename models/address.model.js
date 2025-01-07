@@ -5,15 +5,35 @@ const addressSchema = new mongoose.Schema({
         type: String,
         required: true 
     },
-    address: {
+    city: {
+        type: String,
+        required: true 
+    }, 
+    state: {
+        type: String,
+        required: true 
+    }, 
+    apartment: {
+        type: String,
+        required: true 
+    }, 
+    street: {
         type: String,
         required: true 
     }, 
     phoneNo: {
         type: String,
         required: true
+    },
+    zipcode: {
+        type: Number,
+        required: true
+    },
+    isPrimary: {
+        type: Boolean,
+        default: false // A flag to mark the primary address
     }
+
 })
 
-const Address = mongoose.model('Address', addressSchema)
-module.exports = { Address }
+module.exports = mongoose.model('Address', addressSchema)

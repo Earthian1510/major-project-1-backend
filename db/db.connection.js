@@ -11,7 +11,7 @@ const initializeDatabase = async () => {
         })
 
         if(connection){
-            console.log('Connection Successful')
+            console.log('Connection Successful\n----------------------\n')
         }
     }
     catch(error) {

@@ -5,10 +5,9 @@ const categorySchema = new mongoose.Schema({
         type: String,
         required: true 
     },
-    imgUrl: {
+    imageUrl: {
         type: String
     }
 })
 
-const Category = mongoose.model("Category", categorySchema)
-module.exports = { Category }
+module.exports = mongoose.model("Category", categorySchema)
