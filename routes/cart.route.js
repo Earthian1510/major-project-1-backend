@@ -6,8 +6,7 @@ const router = express.Router();
 // Get all Carts
 router.get('/cart', async (req, res) => {
   try{
-    const carts = await Cart.find()
-    // .populate('items.productId');
+    const carts = await Cart.find().populate('items.productId');
     res.status(200).json(carts)
   }
   catch(error){
@@ -16,33 +15,11 @@ router.get('/cart', async (req, res) => {
   }
 })
 
-// Create a new cart
-router.post('/cart', async (req, res) => {
-  const { userId, items } = req.body;
-
-  try {
-      const existingCart = await Cart.findOne({ userId });
-      if (existingCart) {
-          return res.status(400).json({ message: 'Cart for this user already exists' });
-      }
-
-      const newCart = new Cart({
-          userId,
-          items,
-      });
-
-      const savedCart = await newCart.save();
-      res.status(201).json(savedCart);
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-});
-
 // Get Cart by UserId
 router.get('/cart/:userId', async (req, res) => {
   const { userId } = req.params;
   try{
-    const cart = await Cart.findOne({ userId}).populate('items.productId');
+    const cart = await Cart.findOne({ userId }).populate('items.productId');
     if(!cart){
       return res.status(404).json({ message: 'Cart not found'});
     }
@@ -60,12 +37,22 @@ router.post('/cart/:userId/items', async (req, res) => {
   const { productId, quantity } = req.body 
 
   try{
-    const cart = await Cart.findOne({ userId });
+    let cart = await Cart.findOne({ userId });
+    
+    if(!cart){
+      cart = new Cart({
+        userId,
+        items: [],
+      })
+    }
     const existingItem = cart.items.find((item) => item.productId.toString() === productId)
     if (existingItem) {
-      existingItem.quantity += 1
+      existingItem.quantity += quantity
     }
-    cart.items.push({ productId, quantity });
+    else{
+      cart.items.push({ productId, quantity });
+    }
+    
     const updatedCart = await cart.save()
     res.status(200).json({ message: 'Cart updated successfully', updatedCart})
   }
@@ -83,7 +70,7 @@ router.patch('/cart/:userId/item/:productId', async( req, res) => {
   try{
     const cart = await Cart.findOne({ userId })
     if(!cart){
-      const newCart = new Cart({ userId, items });
+      const newCart = new Cart({ userId, items: [] });
       await newCart.save();
     }
 
