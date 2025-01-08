@@ -22,9 +22,24 @@ router.get('/users', async (req, res) => {
     }
 })
 
+// GET a User by Id
+router.get('/users/:id', async (req, res) => {
+    const { userId } = req.params.id;
+    try{
+        const user = await UserDB.findOne({ _id: userId })
+        if(!user){
+            res.status(404).json({ message: "User not found."})
+        }
+        res.status(201).json(user)
+    }
+    catch(error){
+        res.status(500).json({ error: "Internal server error" })
+    }
+})
+
 // POST a new user 
 router.post('/auth/signup', async (req, res) => {
-    const { name, address, phoneNo, email, orders, userImage, password, cart, wishlist} = req.body 
+    const { name, email, password} = req.body 
 
     try{
         const existingUser = await UserDB.findOne({ email });
@@ -33,7 +48,7 @@ router.post('/auth/signup', async (req, res) => {
         }
         else{
             const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-            const user = new UserDB({name, address, phoneNo, email, orders, userImage, password: hashedPassword, cart, wishlist})
+            const user = new UserDB({name, phoneNo: '', email, userImage: '', password: hashedPassword})
             await user.save();
             res.status(201).json({message: "User created successfully"});
         }        
@@ -90,19 +105,31 @@ router.post('/auth/login', async (req, res) => {
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        console.log(isPasswordValid)
         if(!isPasswordValid){
             return res.status(400).json({message: 'Invalid Password'})
         }
 
-        const token = jwt.sign({ userId: user._id}, JWT_SECRET, {expiresIn: '1hr'})
-        res.json({token})
+        const token = jwt.sign({ userId: user._id}, JWT_SECRET, { expiresIn: '1hr' })
+
+        // Saving User Data in Localstorage 
+        const userData = {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            userImage: user.userImage,
+            phoneNo: user.phoneNo
+        }
+        res.status(200).json({
+            token, 
+            user: userData
+        })
+
     }
     catch(error){
         if (error.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Token has expired' });
         }
-        return res.status(402).json({ message: 'Invalid token' });
+        return res.status(500).json({ message: 'Internal server error' });
     }
 })
 
