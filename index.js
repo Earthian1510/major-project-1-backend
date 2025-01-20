@@ -7,6 +7,7 @@ const addressRoutes = require('./routes/address.route')
 const userRoutes = require('./routes/user.route')
 const cartRoutes = require('./routes/cart.route');
 const wishlistRoutes = require('./routes/wishlist.route');
+const orderRoutes = require('./routes/order.route');
 
 initializeDatabase()
 
@@ -25,6 +26,7 @@ app.use('/', addressRoutes)
 app.use('/', userRoutes)
 app.use('/', cartRoutes)
 app.use('/', wishlistRoutes)
+app.use('/', orderRoutes)
 
 
 const PORT = process.env.PORT || 3000
